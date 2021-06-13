@@ -1,0 +1,9 @@
+# Ignore any build artifacts
+*.bin
+*.iso
+*.flp
+
+# Ignore object files
+bin/**
+
+.vscode/**
