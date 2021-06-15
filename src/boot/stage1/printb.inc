@@ -1,4 +1,7 @@
 realprint: # args: string pointer in bx
+    push %ax
+    push %si
+
     mov $0xe, %ah # Set to teletype function (0xe)
     mov %bx, %si # Move the string pointer into %si
 realprint_looptop:
@@ -8,5 +11,7 @@ realprint_looptop:
     int $0x10 # call print
     jmp realprint_looptop # return to top of loop
 realprint_end:
+    pop %ax
+    pop %si
     ret # Return
     

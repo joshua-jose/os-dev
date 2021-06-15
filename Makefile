@@ -30,13 +30,14 @@ vpath $(SRCDIR):$(SRCDIR)/**
 $(BINDIR)/%.s.o: $(SRCDIR)/%.s
 	@echo File $< $@
 	@mkdir -p $(dir $@)
-	@$(AS) $(ASFLAGS) -o $@ $<
+	@$(AS) $(ASFLAGS) -I $(dir $<) -o $@ $<
 
 $(IMAGE): $(ASMOBJ)
 	@$(LD) $(LDFLAGS) -o $(IMAGE) $(ASMOBJ)
 
 build: $(IMAGE)
 
+# Debug: @qemu-system-x86_64 -drive file=$(IMAGE),format=raw -d cpu,exec,in_asm -nographic
 run: $(IMAGE)
 	@qemu-system-x86_64 -drive file=$(IMAGE),format=raw -curses
 
