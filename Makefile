@@ -7,7 +7,7 @@ ROOT=.
 SRCDIR=$(ROOT)/src
 BINDIR=$(ROOT)/bin
 
-IMAGE=os.bin
+IMAGE=os.flp
 
 # filename extensions
 CEXTS:=c

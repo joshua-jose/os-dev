@@ -16,8 +16,9 @@ _start:
     call realprint # print
 
     call load_stage_2 # Load the second stage of the bootloader
-
+    
     call enable_a20 # Enable the A20 line
+    
     cli # Disable interrupts
     jmp STAGE2_SPACE # Enter stage 2 of bootloader, attempt to enter protected mode.
 # End of _start
@@ -42,12 +43,13 @@ load_stage_2:
 read_failed:
     mov $read_failed_msg, %bx # Move string pointer into bx
     call realprint # print
-    jmp .
+    hlt
+    jmp .-1
 
 .include "printb.inc"
 .include "a20.inc"
 
-msg: .asciz "Hello World!\n"
+msg: .asciz "Hello World!\r\n"
 read_failed_msg: .asciz "\nDisk read failed"
 BOOT_DISK: .byte 0 # The disk we booted from
 
