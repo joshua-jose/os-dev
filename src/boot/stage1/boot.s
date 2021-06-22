@@ -7,6 +7,7 @@
 .equ STAGE2_SPACE, 0x7e00
 
 _start:
+    # BIOS puts the number of the boot disk into %dl at the start
     mov %dl, (BOOT_DISK) # Move the disk number into the BOOT_DISK VARIABLE
 
     mov $0x7c00, %bp # Move 0x7c00 (The base of our stack) into the bp (base pointer) register
@@ -15,8 +16,12 @@ _start:
     mov $msg, %bx # Move string pointer into bx
     call realprint # print
 
+    # Tell BIOS that we intend to end up in 64 bit long mode
+    mov $0xEC00, %ax # Magic number for mode telling 
+    mov $2, %bl # 2 is for long mode
+    int $0x15 # Tell the BIOS
+
     call load_stage_2 # Load the second stage of the bootloader
-    
     call enable_a20 # Enable the A20 line
     
     cli # Disable interrupts
