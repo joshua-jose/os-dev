@@ -3,8 +3,7 @@
 .global _start
 .text
 
-# BIOS loads boot sector to 0x7C00 to 0x7DFF, so load right after
-.equ STAGE2_SPACE, 0x7e00
+.include "consts.inc" # Constants
 
 _start:
     # BIOS puts the number of the boot disk into %dl at the start
@@ -23,36 +22,24 @@ _start:
 
     call load_stage_2 # Load the second stage of the bootloader
     call enable_a20 # Enable the A20 line
+    call load_kernel # Load the kernel into memory
     
     cli # Disable interrupts
     jmp STAGE2_SPACE # Enter stage 2 of bootloader, attempt to enter protected mode.
 # End of _start
 
 load_stage_2:
-    pusha # Push all register values from stack
-    mov $0x02, %ah # BIOS function to read from disk
     mov $STAGE2_SPACE, %bx # Read to STAGE2_SPACE, where stage 2 will be loaded
-    mov $4, %al # Read 4 sectors
-    mov (BOOT_DISK), %dl # Select the disk we want to read from (our boot disk)
-    mov $0x00, %ch # Select cylinder 0
-    mov $0x00, %dh  # Select head 0
+    mov $STAGE2_SECTORS, %al # Read enough sectors to read stage 2
     mov $0x02, %cl  # Select sector
     
-    int $0x13 # Call BIOS interrupt to read from disk
-    popa # Pop all register values from stack
-    jc read_failed # BIOS function sets carry bit if disk read failed
-    # So, jump to error routine if function errored
+    call disk_load # Load data from disk using above arguments
     ret
-
-# Drive read error routine, print error message and halt.
-read_failed:
-    mov $read_failed_msg, %bx # Move string pointer into bx
-    call realprint # print
-    hlt
-    jmp .-1
 
 .include "printb.inc"
 .include "a20.inc"
+.include "diskload.inc"
+.include "kernel_loader.inc"
 
 msg: .asciz "Hello World!\r\n"
 read_failed_msg: .asciz "\nDisk read failed"

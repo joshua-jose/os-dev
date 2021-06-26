@@ -3,8 +3,8 @@
 
 # Entry point
 jmp enter_protected_mode
+.include "consts.inc" # Constants
 
-.equ VGA_START, 0xB8000
 # GDT must be defined before trying to enter protected mode
 .include "gdt.inc"
 enter_protected_mode:
@@ -25,5 +25,5 @@ enter_protected_mode:
 .code64
 .include "boot64.inc"
 
-.fill 2048-(.-.text), 1, 0  # fill every remaining byte from the start to byte 2048 with 0
-#This fills 4 sectors 
+.fill STAGE2_SIZE-(.-.text), 1, 0  # fill every remaining byte from the start to byte 1024 with 0
+#This fills 2 sectors 
