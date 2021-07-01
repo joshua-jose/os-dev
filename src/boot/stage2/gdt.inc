@@ -23,7 +23,7 @@ gdt_datadesc:
     .byte 0b10010010 # Access byte
     # Granularity (1 for 4kb, 0 for 1 byte), size (1 for 32 bit), 0, 0
     # Last 4 bits are second part of code seg limit
-    .byte 0b11001111 # fist 4 bits are flags, next four are rest of limits
+    .byte 0b11001111 # first 4 bits are flags, next four are rest of limits
     .byte 0x00 # Last part of the base
 gdt_end: 
 

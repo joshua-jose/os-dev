@@ -15,9 +15,9 @@ CEXTS:=c
 ASMEXTS:=s S
 CXXEXTS:=cpp c++ cc
 
-LDFLAGS=--oformat binary -Ttext 0x7c00 -e _start
+LDFLAGS=--oformat binary -Ttext 0x7c00
 ASFLAGS=-I $(SRCDIR)/boot
-CCFLAGS=-m64 -ffreestanding -mno-red-zone -O2 -fno-exceptions -fno-rtti -mno-mmx -mno-sse -mno-sse2 -fno-stack-protector -nostdlib -static
+CCFLAGS=-m64 -ffreestanding -mno-red-zone -O2 -fno-exceptions -fno-rtti -mno-mmx -mno-sse -mno-sse2 -fno-stack-protector -nostdlib -static -Wall -Wextra -lgcc
 
 .DEFAULT_GOAL=run
 .PHONY: build clean all
@@ -36,17 +36,17 @@ BOOTOBJ=$(addprefix $(BINDIR)/,$(patsubst $(SRCDIR)/%,%.o,$(call BOOTSRC,$1)))
 vpath $(SRCDIR):$(SRCDIR)/**
 
 $(BINDIR)/%.s.o: $(SRCDIR)/%.s
-	@echo Compiling assembly file $< $@
+	@echo Compiling assembly file $< to $@
 	@mkdir -p $(dir $@)
-	@$(AS) $(ASFLAGS) -I $(dir $<) -o $@ $<
+	@$(AS) $(ASFLAGS) -c -I $(dir $<) -o $@ $<
 
 $(BINDIR)/%.cpp.o: $(SRCDIR)/%.cpp
-	@echo Compiling C++ file $< $@
+	@echo Compiling C++ file $< to $@
 	@mkdir -p $(dir $@)
-	@$(CC) $(CCFLAGS) -o $@ $< 
+	@$(CC) $(CCFLAGS) -c -o $@ $< 
 
 $(IMAGE): $(BOOTOBJ) $(CXXOBJ)
-
+	@echo Linking...
 	@$(LD) -o bin/boot.bin $(LDFLAGS) $(BOOTOBJ)
 	@$(CC) $(CCFLAGS) -T klink.ld $(CXXOBJ) -o bin/kernel.bin
 
@@ -54,8 +54,6 @@ $(IMAGE): $(BOOTOBJ) $(CXXOBJ)
 
 	@dd if=/dev/zero of=$(IMAGE) bs=512 count=2880 status=none
 	@dd if=bin/os.bin of=$(IMAGE) conv=notrunc status=none
-
-	@rm bin/boot.bin bin/kernel.bin bin/os.bin
 
 build: $(IMAGE)
 

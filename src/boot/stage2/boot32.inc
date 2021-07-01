@@ -1,6 +1,7 @@
 .include "print32.inc"
 .include "CPUID.inc"
 .include "paging.inc"
+.include "move_kernel.inc"
 
 # Enter 32 bit mode :)
 start_protected_mode:
@@ -24,6 +25,8 @@ start_protected_mode:
     # Test print
     mov $msg2, %ebx # Move string pointer into ebx
     call print32
+
+    call move_kernel
     
     call detect_long_mode_support
     call enter_long_mode
