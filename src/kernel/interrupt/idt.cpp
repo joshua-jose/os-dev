@@ -1,0 +1,47 @@
+#include <cstdint>
+#include "kernel/interrupt/idt.hpp"
+#include "kernel/printk.hpp"
+#include "kernel/consts.hpp"
+
+__attribute__((aligned(0x10))) 
+static idt_entry_t idt[256]; // The interrupt descriptor table
+static idtr_t idtr; // The IDT descriptor that will be loaded
+
+void idt_set_descriptor(uint8_t vector, void* isr, uint8_t flags) {
+    idt_entry_t* descriptor = &idt[vector];
+ 
+    descriptor->isr_low       = (uint64_t)isr & 0xFFFF;
+    descriptor->kernel_cs     = GDT_OFFSET_KERNEL_CODE;
+    descriptor->ist           = 0;
+    descriptor->attributes    = flags;
+    descriptor->isr_mid       = ((uint64_t)isr >> 16) & 0xFFFF;
+    descriptor->isr_high      = ((uint64_t)isr >> 32) & 0xFFFFFFFF;
+    descriptor->reserved      = 0;
+}
+static int x=0;
+
+__attribute__((__interrupt__))
+void interrupt_handler(interrupt_frame_t* frame){
+    
+    char test[] = ".";
+    printk(test,x);
+    x++;
+
+    //asm volatile("push %eax");
+    // Load 0x20 into al, then output al to device 0x20
+    // This tells the PIC that we ack the interrupt
+    asm volatile ("mov $0x20, %al");
+    asm volatile ("out %al, $0x20");
+}
+
+void idt_init(){
+    idtr.base = (uintptr_t)&idt[0]; // address of base of idt
+    idtr.limit = (uint16_t)sizeof(idt_entry_t) * 255; // Size of idt (num_entries * sizeof_entry)
+
+    for (uint8_t vector = 0; vector < 32; vector++) {
+        idt_set_descriptor(vector, (void*)interrupt_handler, 0x8E);
+    }
+ 
+    asm volatile ("lidt %0" : : "memory"(idtr)); // load the new IDT
+    asm volatile ("sti"); // set the interrupt flag
+}

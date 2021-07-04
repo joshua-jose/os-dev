@@ -7,6 +7,7 @@ CC=$(ARCHTUPLE)g++
 ROOT=.
 SRCDIR=$(ROOT)/src
 BINDIR=$(ROOT)/bin
+INCDIR=$(ROOT)/include
 
 IMAGE=os.flp
 
@@ -17,7 +18,8 @@ CXXEXTS:=cpp c++ cc
 
 LDFLAGS=--oformat binary -Ttext 0x7c00
 ASFLAGS=-I $(SRCDIR)/boot
-CCFLAGS=-m64 -ffreestanding -mno-red-zone -O2 -fno-exceptions -fno-rtti -mno-mmx -mno-sse -mno-sse2 -fno-stack-protector -nostdlib -static -Wall -Wextra -lgcc
+CCFLAGS=-m64 -ffreestanding -mno-red-zone -O2 -fno-exceptions -fno-rtti -mno-mmx -mgeneral-regs-only
+CCFLAGS+= -mno-sse -mno-sse2 -fno-stack-protector -nostdlib -static -Wall -Wextra -lgcc -I $(INCDIR)
 
 .DEFAULT_GOAL=run
 .PHONY: build clean all
@@ -36,6 +38,7 @@ BOOTOBJ=$(addprefix $(BINDIR)/,$(patsubst $(SRCDIR)/%,%.o,$(call BOOTSRC,$1)))
 vpath $(SRCDIR):$(SRCDIR)/**
 
 $(BINDIR)/%.s.o: $(SRCDIR)/%.s
+	@echo $(INCLUDE)
 	@echo Compiling assembly file $< to $@
 	@mkdir -p $(dir $@)
 	@$(AS) $(ASFLAGS) -c -I $(dir $<) -o $@ $<
@@ -48,7 +51,7 @@ $(BINDIR)/%.cpp.o: $(SRCDIR)/%.cpp
 $(IMAGE): $(BOOTOBJ) $(CXXOBJ)
 	@echo Linking...
 	@$(LD) -o bin/boot.bin $(LDFLAGS) $(BOOTOBJ)
-	@$(CC) $(CCFLAGS) -T klink.ld $(CXXOBJ) -o bin/kernel.bin
+	@$(CC) $(CCFLAGS) -T klink.ld $(CXXOBJ) -o bin/kernel.bin -I $(dir $<)
 
 	@cat bin/boot.bin bin/kernel.bin > bin/os.bin
 

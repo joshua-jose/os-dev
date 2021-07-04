@@ -10,18 +10,18 @@ BPB: # BIOS Parameter Block (Defines data about a drive)
 jmp _start
 nop
 bpbOEMIdentifier:       .quad 0x0
-bpbBytesPerSector:      .word 512
-bpbSectorsPerCluster:   .byte 1
-bpbReservedSectors:     .word 4
-bpbNumberOfFATs:        .byte 2
-bpbRootEntries:         .word 224
-bpbTotalSectors:        .word 2880
+bpbBytesPerSector:      .word 512  # Size of each sector in bytes
+bpbSectorsPerCluster:   .byte 1    # Number of sectors per cluster
+bpbReservedSectors:     .word 4    # Reserved sectors
+bpbNumberOfFATs:        .byte 1    # How many tables 
+bpbRootEntries:         .word 224  # Entries in root directory
+bpbTotalSectors:        .word 2880 # Number of sectors in the volume, if 0, then there are more than 65535 sectors
 bpbMediaDescriptor:     .byte 0xF0
-bpbSectorsPerFAT:       .word 9
+bpbSectorsPerFAT:       .word 9    # How big the FAT is in sectors
 bpbSectorsPerTrack:     .word 18
 bpbHeadsPerCylinder:    .word 2
-bpbHiddenSectors:       .long 4
-bpbTotalSectorsBig:     .long 0
+bpbHiddenSectors:       .long 4    # Number of sectors until the start of the partition
+bpbTotalSectorsBig:     .long 0    # If totalSectors is 0, then use this value instead for number of sectors
 ebpbDriveNumber:        .byte 0
 ebpbUnused:             .byte 0
 ebpbExtBootSignature:   .byte 0x29
@@ -41,9 +41,8 @@ _start_continue:
     mov %dl, (BOOT_DISK) # Move the disk number into the BOOT_DISK VARIABLE
 
     mov %ax, %ss # Stack segment is 0
-    mov $0x7c00, %bp # Move 0x7c00 (The base of our stack) into the bp (base pointer) register
-    mov %bp, %sp # Move the bp value (base pointer) into the sp (stack pointer) register
-
+    mov $0x7c00, %sp #Move 0x7c00 (The base of our stack) into the sp (stack pointer) register. Says where the stack is.
+    mov %sp, %bp # Move sp into the bp (base pointer) register. Says where the stack starts.
 
     mov $msg, %bx # Move string pointer into bx
     call realprint # print
