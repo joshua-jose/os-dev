@@ -18,7 +18,7 @@ CXXEXTS:=cpp c++ cc
 
 LDFLAGS=--oformat binary -Ttext 0x7c00
 ASFLAGS=-I $(SRCDIR)/boot
-CCFLAGS=-m64 -ffreestanding -mno-red-zone -O2 -fno-exceptions -fno-rtti -mno-mmx -mgeneral-regs-only
+CCFLAGS=-m64 -ffreestanding -std=gnu++14 -mno-red-zone -O2 -fno-exceptions -fno-rtti -mno-mmx -mgeneral-regs-only
 CCFLAGS+= -mno-sse -mno-sse2 -fno-stack-protector -nostdlib -static -Wall -Wextra -lgcc -I $(INCDIR)
 
 .DEFAULT_GOAL=run

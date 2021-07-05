@@ -1,7 +1,5 @@
-#include <cstdint>
-#include "kernel/printk.hpp"
-#include "kernel/interrupt/idt.hpp"
-#include "kernel/consts.hpp"
+#include "kernel/kapi.hpp"
+#include "kernel/interrupt/interrupts.hpp"
 
 struct GDT{
 
@@ -33,13 +31,13 @@ void  _start(){
     // Load file system driver
     // Load k modules into memory and link
 
-    idt_init();
-
+    interrupts_init();
+    /*
     uint8_t colour_code = 0x1f;
     uint8_t character = 0x20;
     int phrase = (colour_code << 8) | character;
     char test[] = "64 bit C++ test code\ntest test";
-    /*
+    
     while (true){
         
         for (int i=0; i<2000;i+=2){

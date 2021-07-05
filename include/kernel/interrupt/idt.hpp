@@ -16,6 +16,7 @@ typedef struct {
 	uint64_t	base;
 } __attribute__((packed)) idtr_t;
 
+// Passed to an ISR
 typedef struct interrupt_frame{
     uint16_t ip;
     uint16_t cs;
@@ -25,4 +26,4 @@ typedef struct interrupt_frame{
 
 } interrupt_frame_t;
 
-void idt_init();
+void idt_init(uintptr_t* interrupt_vectors);

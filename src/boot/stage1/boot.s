@@ -41,8 +41,8 @@ _start_continue:
     mov %dl, (BOOT_DISK) # Move the disk number into the BOOT_DISK VARIABLE
 
     mov %ax, %ss # Stack segment is 0
-    mov $0x7c00, %sp #Move 0x7c00 (The base of our stack) into the sp (stack pointer) register. Says where the stack is.
-    mov %sp, %bp # Move sp into the bp (base pointer) register. Says where the stack starts.
+    mov $0x7c00, %sp # Move 0x7c00 (The base of our stack) into the sp (stack pointer) register. Says where the stack is.
+    mov $0x7c00, %bp # Move 0x7c00 (The base of our stack) into the bp (base pointer) register. Says where the stack starts.
 
     mov $msg, %bx # Move string pointer into bx
     call realprint # print
