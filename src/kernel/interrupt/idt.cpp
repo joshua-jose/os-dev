@@ -1,7 +1,7 @@
 #include "kernel/kapi.hpp"
 #include "kernel/interrupt/idt.hpp"
 
-__attribute__((aligned(0x10))) 
+__attribute__((aligned(0x1000))) 
 static idt_entry_t idt[NUM_INTERRUPTS]; // The interrupt descriptor table
 static idtr_t idtr; // The IDT descriptor that will be loaded
 

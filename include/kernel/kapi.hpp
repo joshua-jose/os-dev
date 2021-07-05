@@ -1,6 +1,7 @@
 #pragma once
 #include <cstdint>
 
+
 #define VGA_START 0xB8000
 #define GDT_OFFSET_KERNEL_CODE 0x08
 #define NUM_INTERRUPTS 256

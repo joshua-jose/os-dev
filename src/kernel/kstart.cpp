@@ -30,7 +30,7 @@ void  _start(){
     // Load memory manager
     // Load file system driver
     // Load k modules into memory and link
-
+    
     interrupts_init();
     /*
     uint8_t colour_code = 0x1f;
@@ -57,3 +57,4 @@ void  _start(){
     }
    */
 };
+
