@@ -11,6 +11,7 @@
 volatile uint16_t* const vmem = (volatile uint16_t*)VGA_START;
 
 void printk(char* in_string,int start_column=0, uint8_t colour_code=0x0f);
+void fputc(char c);
 
 static inline void outb(uint16_t port, uint8_t val) {
     asm volatile ( "outb %0, %1" : : "a"(val), "Nd"(port) );

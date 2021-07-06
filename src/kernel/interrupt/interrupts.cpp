@@ -1,7 +1,7 @@
 #include "kernel/kapi.hpp"
-#include "kernel/interrupt/idt.hpp"
-#include "kernel/interrupt/interrupts.hpp"
-#include "kernel/interrupt/isr.hpp"
+#include "idt.hpp"
+#include "interrupts.hpp"
+#include "isr.hpp"
 
 void interrupts_init(){
     // Pass to idt_init an array of function pointers (64 bit addresses)

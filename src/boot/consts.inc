@@ -9,6 +9,6 @@
 .equ STAGE2_SECTORS, (STAGE2_SIZE)/512 # Number of sectors in stage 2
 
 .equ KERNEL_SECTOR_START, STAGE2_SECTORS + 2 # Where the kernel sectors will start (after stage 2 sectors)
-.equ KERNEL_SECTORS, 16
+.equ KERNEL_SECTORS, 32
 
 .equ VGA_START, 0xB8000

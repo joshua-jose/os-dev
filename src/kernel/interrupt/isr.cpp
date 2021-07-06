@@ -1,7 +1,8 @@
 #include "kernel/kapi.hpp"
-#include "kernel/interrupt/idt.hpp"
-#include "kernel/interrupt/interrupts.hpp"
-#include "kernel/interrupt/isr.hpp"
+#include "idt.hpp"
+#include "interrupts.hpp"
+#include "isr.hpp"
+#include "kernel/devices/keyboard.hpp"
 
 // An array of ISRs (the actual func type pointers)
 static void (*ISRs[NUM_INTERRUPTS])(interrupt_frame_t*);
@@ -23,35 +24,13 @@ void generic_isr(interrupt_frame_t*){
     outb(0x20,0x20);
 }
 
-const char scancode_to_char[] = {
-         0 ,  0 , '1', '2',
-        '3', '4', '5', '6',
-        '7', '8', '9', '0',
-        '-', '=',  0 ,  0 ,
-        'q', 'w', 'e', 'r',
-        't', 'y', 'u', 'i',
-        'o', 'p', '[', ']',
-         0 ,  0 , 'a', 's',
-        'd', 'f', 'g', 'h',
-        'j', 'k', 'l', ';',
-        '\'','`',  0 , '\\',
-        'z', 'x', 'c', 'v',
-        'b', 'n', 'm', ',',
-        '.', '/',  0 , '*',
-         0 , ' '
-};
-
-static int x=0;
 void keyboard_isr(interrupt_frame_t*){
     // Read scancode from keyboard device
-    uint8_t scancode = inb(0x60);
+    scancode_t scancode = inb(0x60);
 
-    if (scancode <= 58){
-        char key = scancode_to_char[scancode];
-        printk(&key,x);
-        x++;
-    }
-    
+    // Tell driver we recieved a scancode
+    keyboard_recieve_scancode(scancode);
+
     // Send an ack (0x20) to the PIC (on port 0x20)
     outb(0x20,0x20);
 }

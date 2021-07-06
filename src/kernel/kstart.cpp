@@ -1,5 +1,6 @@
 #include "kernel/kapi.hpp"
 #include "kernel/interrupt/interrupts.hpp"
+#include "kernel/tty/tty.hpp"
 
 struct GDT{
 
@@ -21,6 +22,8 @@ typedef struct{
 
 }__attribute__((packed)) page_entry_t;
 
+
+
 // Define _start, and put it in special section ._start
 // This means the linker can put it at the start of the sector
 // Also define as a C style function, so the name isn't mangled
@@ -30,8 +33,26 @@ void  _start(){
     // Load memory manager
     // Load file system driver
     // Load k modules into memory and link
+
+    // Clear screen
+    for (int i=0; i<2000;i++)
+        vmem[i] = 0x0f20;
     
     interrupts_init();
+
+    tty_init();
+    /*
+    for (;;) {
+        int c = getchar();
+        if (c > 0 && c <= 255) {
+            if (c == '\r') {
+                c = '\n';
+            }
+            esh_rx(esh, c);
+        }
+    }
+    */
+
     /*
     uint8_t colour_code = 0x1f;
     uint8_t character = 0x20;

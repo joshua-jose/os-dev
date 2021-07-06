@@ -14,7 +14,7 @@ IMAGE=os.flp
 # filename extensions
 CEXTS:=c
 ASMEXTS:=s S
-CXXEXTS:=cpp c++ cc
+CXXEXTS:=cpp c++ cc c
 
 LDFLAGS=--oformat binary -Ttext 0x7c00
 ASFLAGS=-I $(SRCDIR)/boot
@@ -38,7 +38,6 @@ BOOTOBJ=$(addprefix $(BINDIR)/,$(patsubst $(SRCDIR)/%,%.o,$(call BOOTSRC,$1)))
 vpath $(SRCDIR):$(SRCDIR)/**
 
 $(BINDIR)/%.s.o: $(SRCDIR)/%.s
-	@echo $(INCLUDE)
 	@echo Compiling assembly file $< to $@
 	@mkdir -p $(dir $@)
 	@$(AS) $(ASFLAGS) -c -I $(dir $<) -o $@ $<
@@ -46,7 +45,14 @@ $(BINDIR)/%.s.o: $(SRCDIR)/%.s
 $(BINDIR)/%.cpp.o: $(SRCDIR)/%.cpp
 	@echo Compiling C++ file $< to $@
 	@mkdir -p $(dir $@)
-	@$(CC) $(CCFLAGS) -c -o $@ $< 
+	
+	@$(CC) $(CCFLAGS) -c -I $(subst src/,include/, $(dir $<)) -o $@ $< 
+
+$(BINDIR)/%.c.o: $(SRCDIR)/%.c
+	@echo Compiling C file $< to $@
+	@mkdir -p $(dir $@)
+	
+	@$(CC) $(CCFLAGS) -c -I $(subst src/,include/, $(dir $<)) -o $@ $< 
 
 $(IMAGE): $(BOOTOBJ) $(CXXOBJ)
 	@echo Linking...
