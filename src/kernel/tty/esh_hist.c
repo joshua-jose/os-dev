@@ -40,7 +40,7 @@
  */
 static void init_buffer(char * buffer)
 {
-    memset(buffer, 0xff, ESH_HIST_LEN);
+    //memset(buffer, 0xff, ESH_HIST_LEN);
     buffer[0] = 0;
 }
 

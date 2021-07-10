@@ -13,7 +13,7 @@ typedef struct {
 // This is passed in the load idt instruction
 typedef struct {
 	uint16_t	limit;
-	uint64_t	base;
+	uintptr_t	base;
 } __attribute__((packed)) idtr_t;
 
 // Passed to an ISR

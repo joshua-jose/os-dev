@@ -12,15 +12,15 @@ nop
 bpbOEMIdentifier:       .quad 0x0
 bpbBytesPerSector:      .word 512  # Size of each sector in bytes
 bpbSectorsPerCluster:   .byte 1    # Number of sectors per cluster
-bpbReservedSectors:     .word 4    # Reserved sectors
+bpbReservedSectors:     .word 2+KERNEL_SECTORS    # Reserved sectors
 bpbNumberOfFATs:        .byte 1    # How many tables 
 bpbRootEntries:         .word 224  # Entries in root directory
-bpbTotalSectors:        .word 2880 # Number of sectors in the volume, if 0, then there are more than 65535 sectors
+bpbTotalSectors:        .word 28800 # Number of sectors in the volume, if 0, then there are more than 65535 sectors
 bpbMediaDescriptor:     .byte 0xF0
 bpbSectorsPerFAT:       .word 9    # How big the FAT is in sectors
 bpbSectorsPerTrack:     .word 18
 bpbHeadsPerCylinder:    .word 2
-bpbHiddenSectors:       .long 4    # Number of sectors until the start of the partition
+bpbHiddenSectors:       .long 2+KERNEL_SECTORS    # Number of sectors until the start of the partition
 bpbTotalSectorsBig:     .long 0    # If totalSectors is 0, then use this value instead for number of sectors
 ebpbDriveNumber:        .byte 0
 ebpbUnused:             .byte 0

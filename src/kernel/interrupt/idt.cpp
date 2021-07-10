@@ -20,11 +20,15 @@ void idt_set_descriptor(uint8_t vector, void* isr, uint8_t flags) {
 // Initialise interrupts
 void idt_init(uintptr_t* interrupt_vectors){
     idtr.base = (uintptr_t)&idt[0]; // address of base of idt
-    idtr.limit = (uint16_t)sizeof(idt_entry_t) * 255; // Size of idt (num_entries * sizeof_entry)
+    idtr.limit = (uint16_t)sizeof(idt_entry_t) * NUM_INTERRUPTS; // Size of idt (num_entries * sizeof_entry)
 
-    for (uint8_t vector = 0; vector < 32; vector++) {
+    for (uint16_t vector = 0; vector < NUM_INTERRUPTS; vector++) {
         idt_set_descriptor(vector, (void*)interrupt_vectors[vector], 0x8E);
     }
+
+    // Only enable keyboard interrupts (rest are undesired)
+    outb(0x21,0xfd);
+    outb(0xa1,0xff);
  
     asm volatile ("lidt %0" : : "memory"(idtr)); // load the new IDT
     asm volatile ("sti"); // set the interrupt flag

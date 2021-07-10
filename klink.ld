@@ -13,6 +13,16 @@ SECTIONS
 	{
 		*(._start);
 		*(.text*);
+		_etext = .;
+	}
+
+	 
+	/* Read-write data (initialized) */
+	.data BLOCK(4K) : ALIGN(4K)
+	{
+		_sdata = .;
+		*(.data*)
+		_edata = .;
 	}
 
 	/* Read-only data. */
@@ -20,18 +30,15 @@ SECTIONS
 	{
 		*(.rodata*)
 	}
- 
-	/* Read-write data (initialized) */
-	.data BLOCK(4K) : ALIGN(4K)
-	{
-		*(.data*)
-	}
- 
+
 	/* Read-write data (uninitialized) and stack */
 	.bss BLOCK(4K) : ALIGN(4K)
 	{
+		_sbss = .;
 		*(COMMON)
 		*(.bss*)
+		_ebss = .;
 	}
+	_end =.;
  
 }

@@ -5,7 +5,7 @@ const char scancode_to_char[] = {
          0 , 27 , '1', '2',
         '3', '4', '5', '6',
         '7', '8', '9', '0',
-        '-', '=',  8 ,  9 ,
+        '-', '=', '\b', 9 ,
         'q', 'w', 'e', 'r',
         't', 'y', 'u', 'i',
         'o', 'p', '[', ']',
@@ -32,10 +32,11 @@ extern esh_t* esh;
 
 void keyboard_recieve_scancode(scancode_t scancode){
     static int x=0;
+
      if (scancode <= 58){
         char key = scancode_to_char[scancode];
         // Keep the enter key
-        if ((int)key < 32 && scancode != 0x1C) return;
+        //if ((int)key < 32 && key != '\n' && key != '\b') return;
         esh_rx(esh, key);
         //printk(&key,x);
         x++;

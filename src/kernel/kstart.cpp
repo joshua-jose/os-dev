@@ -1,6 +1,9 @@
 #include "kernel/kapi.hpp"
 #include "kernel/interrupt/interrupts.hpp"
 #include "kernel/tty/tty.hpp"
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
 
 struct GDT{
 
@@ -23,24 +26,30 @@ typedef struct{
 }__attribute__((packed)) page_entry_t;
 
 
-
-// Define _start, and put it in special section ._start
-// This means the linker can put it at the start of the sector
-// Also define as a C style function, so the name isn't mangled
-extern "C"
-__attribute__ ((section("._start")))
-void  _start(){
+void kmain(){
     // Load memory manager
     // Load file system driver
     // Load k modules into memory and link
+
 
     // Clear screen
     for (int i=0; i<2000;i++)
         vmem[i] = 0x0f20;
     
     interrupts_init();
-
     tty_init();
+
+    /*
+    char test[12];
+    itoa(32, test, 10);
+    printk(test);
+    sprintf(test, "hi");
+    */
+   
+    while (true)
+        asm volatile ("hlt;jmp .-1;");
+    
+
     /*
     for (;;) {
         int c = getchar();
@@ -52,30 +61,37 @@ void  _start(){
         }
     }
     */
-
-    /*
-    uint8_t colour_code = 0x1f;
-    uint8_t character = 0x20;
-    int phrase = (colour_code << 8) | character;
-    char test[] = "64 bit C++ test code\ntest test";
-    
-    while (true){
-        
-        for (int i=0; i<2000;i+=2){
-            // Put coloured space in two slots
-            vmem[i] = phrase;
-            vmem[i+1] = phrase;
-
-            // Change the colour every two spaces
-            colour_code+= 0x10;
-            phrase = (colour_code << 8) | character;
-
-            if (i%40 == 0) colour_code+= 0x10;
-        }
-        
-        printk(test);
-        for (int i=0;i<0xFF00000;i++) asm("nop");
-    }
-   */
 };
+
+extern uintptr_t _sbss;
+extern uintptr_t _ebss;
+extern uintptr_t _etext;
+extern uintptr_t _sdata;
+extern uintptr_t _edata;
+extern uintptr_t _end;
+
+// Define _start, and put it in special section ._start
+// This means the linker can put it at the start of the sector
+// Also define as a C style function, so the name isn't mangled
+extern "C"
+__attribute__ ((section("._start")))
+void  _start(){
+    // Initialize C runtime environment
+
+    // Make sure BSS is initialised to 0
+    for (uintptr_t *bss_ptr = &_sbss; bss_ptr < &_ebss;) {
+        *bss_ptr++ = 0;
+    }
+
+    // Make sure that the data section is initialized
+    uintptr_t *init_values_ptr = &_etext;
+    uintptr_t *data_ptr = &_sdata;
+    if (init_values_ptr != data_ptr) {
+        for (; data_ptr < &_edata;) {
+            *data_ptr++ = *init_values_ptr++;
+        }
+    }
+
+    kmain();
+}
 
