@@ -2,6 +2,7 @@
 .include "CPUID.inc"
 .include "paging.inc"
 .include "move_kernel.inc"
+.include "setup_float.inc"
 
 # Enter 32 bit mode :)
 start_protected_mode:
@@ -27,8 +28,9 @@ start_protected_mode:
     call print32
 
     call move_kernel
-    
     call detect_long_mode_support
+    call test_fpu
+    call test_sse
     call enter_long_mode
 
 enter_long_mode:
@@ -50,4 +52,6 @@ enter_long_mode:
     # Processor is now in 64 bit mode
     jmp $codeseg, $start_long_mode # Far jump to long mode start
 
+
 msg2: .asciz "Hello from 32 bits!"
+

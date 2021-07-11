@@ -2,8 +2,6 @@
 #include "kernel/interrupt/interrupts.hpp"
 #include "kernel/tty/tty.hpp"
 #include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
 
 struct GDT{
 
@@ -35,17 +33,15 @@ void kmain(){
     // Clear screen
     for (int i=0; i<2000;i++)
         vmem[i] = 0x0f20;
-    
+
+    char buf[30];
+    sprintf(buf,"testing sprintf: %d,%d\n",1,2);
+    printk(buf);
+
     interrupts_init();
     tty_init();
 
-    /*
-    char test[12];
-    itoa(32, test, 10);
-    printk(test);
-    sprintf(test, "hi");
-    */
-   
+
     while (true)
         asm volatile ("hlt;jmp .-1;");
     

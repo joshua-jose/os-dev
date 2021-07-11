@@ -1,5 +1,4 @@
-ARCHTUPLE=~/x-tools/x86_64-elf/bin/x86_64-elf-
-#~/x-tools/x86_64-elf/bin/x86_64-elf-
+ARCHTUPLE=x86_64-elf-
 
 AS=$(ARCHTUPLE)as
 LD=$(ARCHTUPLE)ld
@@ -19,8 +18,8 @@ CXXEXTS:=cpp c++ cc c
 
 LDFLAGS=--oformat binary -Ttext 0x7c00
 ASFLAGS=-I $(SRCDIR)/boot
-CCFLAGS=-m64 -ffreestanding -std=gnu++14 -mno-red-zone -O2 -fno-exceptions -fno-rtti -mno-mmx -mgeneral-regs-only
-CCFLAGS+= -mno-sse -mno-sse2 -fno-stack-protector -static -Wall -Wextra -lgcc -I $(INCDIR)
+CCFLAGS=-m64 -ffreestanding -std=gnu++14 -mno-red-zone -O2 -fno-exceptions -fno-rtti -mno-mmx
+CCFLAGS+= -fno-stack-protector -static -Wall -Wextra -lgcc -I $(INCDIR)
 
 .DEFAULT_GOAL=run
 .PHONY: build clean all
@@ -38,6 +37,13 @@ BOOTSRC=$(foreach asmext,$(ASMEXTS),$(call rwildcard, $(SRCDIR)/boot,*.$(asmext)
 BOOTOBJ=$(addprefix $(BINDIR)/,$(patsubst $(SRCDIR)/%,%.o,$(call BOOTSRC,$1)))
 
 vpath $(SRCDIR):$(SRCDIR)/**
+
+# No floating point operations for ISRs
+$(BINDIR)/%/isr.cpp.o: $(SRCDIR)/%/isr.cpp
+	@echo Compiling C++ file $(notdir $<) to $(notdir $@)
+	@mkdir -p $(dir $@)
+	
+	@$(CC) $(CCFLAGS) -mgeneral-regs-only -c -I $(subst src/,include/, $(dir $<)) -o $@ $< 
 
 $(BINDIR)/%.s.o: $(SRCDIR)/%.s
 	@echo Compiling assembly file $(notdir $<) to $(notdir $@)
@@ -73,7 +79,7 @@ build: $(IMAGE)
 
 # Debug: @qemu-system-x86_64 -drive file=$(IMAGE),format=raw -d cpu,exec,in_asm -nographic
 run: $(IMAGE)
-	@qemu-system-x86_64 -drive file=$(IMAGE),format=raw -curses
+	@qemu-system-x86_64 -fda $(IMAGE) -curses
 
 clean:
 	@rm -rf $(BINDIR)

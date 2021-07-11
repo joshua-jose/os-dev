@@ -74,7 +74,6 @@ load_stage_2:
 .include "load_kernel.inc"
 
 msg: .asciz "Hello World!\r\n"
-read_failed_msg: .asciz "\nDisk read failed"
 BOOT_DISK: .byte 0 # The disk we booted from
 
 /*
