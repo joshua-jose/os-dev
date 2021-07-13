@@ -25,10 +25,6 @@ void idt_init(uintptr_t* interrupt_vectors){
     for (uint16_t vector = 0; vector < NUM_INTERRUPTS; vector++) {
         idt_set_descriptor(vector, (void*)interrupt_vectors[vector], 0x8E);
     }
-
-    // Only enable keyboard interrupts (rest are undesired)
-    outb(0x21,0xfd);
-    outb(0xa1,0xff);
  
     asm volatile ("lidt %0" : : "memory"(idtr)); // load the new IDT
     asm volatile ("sti"); // set the interrupt flag

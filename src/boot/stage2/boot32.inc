@@ -31,6 +31,7 @@ start_protected_mode:
     call detect_long_mode_support
     call test_fpu
     call test_sse
+    call test_avx
     call enter_long_mode
 
 enter_long_mode:

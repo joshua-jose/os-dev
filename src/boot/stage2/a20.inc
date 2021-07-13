@@ -1,3 +1,4 @@
+.include "stage1/printb.inc"
 enable_a20:
     call test_a20
 

@@ -9,7 +9,7 @@
 .equ STAGE2_SECTORS, 2 # Number of sectors in stage 2, should be (STAGE2_SIZE)/512
 
 .equ KERNEL_SECTOR_START, STAGE2_SECTORS + 2 # Where the kernel sectors will start (after stage 2 sectors)
-.equ KERNEL_SECTORS, 64
+.equ KERNEL_SECTORS, 128
 
 .equ CHUNK_SIZE, 1
 .equ SECTOR_SIZE, 512

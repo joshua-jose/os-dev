@@ -5,6 +5,7 @@
 #define VGA_START 0xB8000
 #define GDT_OFFSET_KERNEL_CODE 0x08
 #define NUM_INTERRUPTS 256
+#define IRQ_START 8
 
 // Memory is volatile - Don't optimise it away even if it seems nothing is happening
 // 16 bits per character, and the pointer is constant

@@ -34,10 +34,8 @@ void kmain(){
     for (int i=0; i<2000;i++)
         vmem[i] = 0x0f20;
 
-    char buf[30];
-    sprintf(buf,"testing sprintf: %d,%d\n",1,2);
-    printk(buf);
-
+    //printf("Test");
+    
     interrupts_init();
     tty_init();
 

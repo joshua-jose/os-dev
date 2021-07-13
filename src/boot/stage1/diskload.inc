@@ -1,6 +1,3 @@
-# Sectors per track: bpbSectorsPerTrack
-# Number of heads: bpbHeadsPerCylinder
-
 # Function
 # Loads data from disk into specified location
 # Arguments:
@@ -31,7 +28,7 @@ disk_load:
     xor %ax, %ax # Clear ax 
     mov %cl, %al // Move beginning sector to be divided
     dec %al # LBA starts at 0, CHS starts at 1
-    mov $18, %bl # Divide by sectors per track
+    mov (bpbSectorsPerTrack), %bl # Divide by sectors per track
     div %bl #  LBA / (Sectors per Track)
 
     inc %ah # remainder is in ah
@@ -39,7 +36,7 @@ disk_load:
     
     xor %ah, %ah # ax = al, so just LBA / (Sectors per Track)
 
-    mov $2, %bl
+    mov (bpbHeadsPerCylinder), %bl # divide by heads per cylinder
     div %bl # Temp / (Number of Heads)
 
     mov %ah, (head) # Head = Temp % (Number of Heads)

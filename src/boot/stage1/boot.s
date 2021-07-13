@@ -52,11 +52,21 @@ _start_continue:
     mov $2, %bl # 2 is for long mode
     int $0x15 # Tell the BIOS
 
+    mov $0x08, %ah
+    mov $0, %di # BIOS bug workaround??
+    int $0x13 # Get drive parameters 
+    #jc error_handle # This probably won't error...
+    # Take values and store them
+    add $1, %dh
+    mov %dh, (bpbHeadsPerCylinder)
+    and $0x3f, %cl
+    mov %cl, (bpbSectorsPerTrack) 
+    xor %ax, %ax
+    mov %ax, %es # It sets %es...
+
     call load_stage_2 # Load the second stage of the bootloader
     call load_kernel # Load the kernel into memory
-    call enable_a20 # Enable the A20 line
     
-    cli # Disable interrupts
     jmp STAGE2_SPACE # Enter stage 2 of bootloader, attempt to enter protected mode.
 # End of _start
 
@@ -69,7 +79,7 @@ load_stage_2:
     ret
 
 .include "printb.inc"
-.include "a20.inc"
+
 .include "diskload.inc"
 .include "load_kernel.inc"
 

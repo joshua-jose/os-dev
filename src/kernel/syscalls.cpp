@@ -11,13 +11,16 @@
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 
+#define STDOUT_FILENO 1
+#define STDERR_FILENO 2
+
 extern "C"{
 
 char *__env[1] = { 0 };
-char **environ = __env; /* pointer to array of char * strings that define the current environment variables */
+char **environ = __env; // pointer to array of char * strings that define the current environment variables 
 
 
-void _exit();
+void _exit (int __status);
 
 int close(int file) {
     return -1;
@@ -56,6 +59,7 @@ int read(int file, char *ptr, int len){
 };
 
 caddr_t sbrk(int incr) {
+    
     extern char _end;		/* Defined by the linker */
     static char *heap_end;
     char *prev_heap_end;
@@ -89,7 +93,9 @@ int wait(int *status){
 };
 int write(int file, char *ptr, int len){
     int todo;
-
+    if ((file != STDOUT_FILENO) && (file != STDERR_FILENO))
+        return -1;
+    
     for (todo = 0; todo < len; todo++) {
         fputc(*ptr++);
     }

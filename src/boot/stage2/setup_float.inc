@@ -2,6 +2,7 @@
 .equ CR0_EM, 0b010 # If set, cause #UD on FPU op
 .equ FORCE_FPU, ~(CR0_TS+CR0_EM) # Force FPU usage on FPU op
 .equ SETUP_FPU_CR0, 0b110010
+.equ ENABLE_OSXSAVE, (1 << 18)
 
 test_fpu:
     # Test for FPU support
@@ -47,6 +48,42 @@ no_sse:
     mov $no_sse_msg, %ebx # Move string pointer into ebx
     call print32
     hlt
+
+test_avx:
+    // Test for OSXSAVE bit
+    mov $0x1, %eax
+    cpuid
+    test $(1<<26), %ecx # Look for XSAVE bit
+    jz no_avx
+
+    mov %cr0, %edx # load CR0
+    or $ENABLE_OSXSAVE, %edx
+    mov %edx, %cr0 # Save CR0
+
+    test $(1<<28), %ecx // AVX bit
+    jz no_avx
+
+    # AVX support is broken on virtualbox...
+    #call enable_avx 
+
+no_avx:                     # AVX is not required
+    ret
+
+enable_avx:
+    push %eax
+    push %ecx
+    push %edx
+ 
+    xor %ecx, %ecx
+    xgetbv      #Load XCR0 register
+    or $7, %eax #Set AVX, SSE, X87 bits
+    xsetbv      #Save back to XCR0
+ 
+    pop %edx
+    pop %ecx
+    pop %eax
+    ret
+
 
 nofpu_msg: .asciz  "No FPU detected        "
 no_sse_msg: .asciz "No SSE detected        "

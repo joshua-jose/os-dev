@@ -7,7 +7,11 @@ jmp enter_protected_mode
 
 # GDT must be defined before trying to enter protected mode
 .include "gdt.inc"
+.include "a20.inc"
+
 enter_protected_mode:
+    call enable_a20 # Enable the A20 line
+    cli # Disable interrupts
     
     lgdt (gdt_descriptor) # Load our GDT
     # Set the protected mode bit
