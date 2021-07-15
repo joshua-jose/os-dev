@@ -5,7 +5,8 @@ start_long_mode:
     mov $0xff20ef20cf20af20, %rax # String for coloured spaces
     mov $500, %ecx
     rep stosq # Store quad in %rax into VGA memory, rep 500 times
-
+    mov %bp, %sp # Clear the stack 
+    
     call KERNEL_SPACE # Call _start in kernel
     hlt
     jmp .

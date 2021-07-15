@@ -14,10 +14,14 @@ enter_protected_mode:
     cli # Disable interrupts
     
     lgdt (gdt_descriptor) # Load our GDT
+
+    mov %bp, %sp # Clear the stack 
+    
     # Set the protected mode bit
     mov %cr0, %eax
     or $1, %eax
     mov %eax, %cr0
+ 
     # Long jump to start of protected mode
     jmp $codeseg, $start_protected_mode
 

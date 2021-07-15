@@ -48,8 +48,7 @@ void show_colours(){
         
         for (int i=0;i<0xFF00000;i++) asm("nop");
     }
-    for (int i=0; i<2000;i++)
-        vmem[i] = 0x0f20;
+    printk("\e[3J"); // ANSI code for screen clear
 }
 
 
@@ -62,6 +61,8 @@ void esh_command_cb(esh_t * esh, int argc, char ** argv, void * arg)
             printk("So... uhhh... there are no commands...\n");
         else if (!strcmp(argv[0], "colours")) 
             show_colours();
+        else if (!strcmp(argv[0], "clear")) 
+             printk("\e[3J");
         else
             printk("Command not found\n");       
     }
@@ -78,4 +79,5 @@ void tty_init(){
     esh_register_print(esh, esh_print_cb);
 
     esh_rx(esh, '\n');
+    esh_hist_init(esh);
 };

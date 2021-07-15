@@ -3,6 +3,9 @@
 *.iso
 *.flp
 
+# Ignore bochs config
+*.bxrc
+
 # Ignore object files
 bin/**
 

@@ -20,13 +20,82 @@ void update_cursor(int column, int line) {
     outb(0x3D5, (uint8_t) ((pos >> 8) & 0xFF));
 }
 
+void clear_line(int line){
+    
+    for (int i=0; i<LINE_LENGTH;i++)
+        vmem[(line*LINE_LENGTH)+i] = 0x0f20;
+}
+
+void clear_screen(){
+    for (int i=0; i<2000;i++)
+        vmem[i] = 0x0f20;
+}
+
 void kputc(char c, uint8_t colour_code=0x0f){
     static int column = 0;
     static int line = 0;
 
+    static bool escape_start = false;
+    static bool ansi_csi = false;
+    static int ansi_n = 0;
+
+    // ANSI handling
+    // ---------------------------------------------------------
+    if(ansi_csi){
+        if (c >= '0' && c <= '9'){
+            ansi_n = (int)c - 0x30; // Convert char to int
+            return;
+        }
+        switch (c){
+            case 'D':
+                column -= ansi_n;
+                if (column < 0) column = 0;
+                update_cursor(column, line);
+                ansi_n = 0;
+            break; 
+
+            case 'C':
+                column += ansi_n;
+                if (column > LINE_LENGTH) column = LINE_LENGTH;
+                update_cursor(column, line);
+                ansi_n = 0;
+            break; 
+            case 'K':
+                if (ansi_n==2) clear_line(line);
+                ansi_n = 0;
+            break;
+
+            case 'J':
+                if (ansi_n==3) {
+                    clear_screen();
+                    column = 0;
+                    line = 0;
+                    update_cursor(column, line);
+                }
+                ansi_n = 0;
+            break;
+        }
+        ansi_csi = false;
+        return;
+    }
+
+    if (escape_start && c == '['){
+        ansi_csi = true;
+        escape_start = false;
+        return;
+    }
+    if (c == '\e'){
+        escape_start = true;
+        return;
+    }
+    // ---------------------------------------------------------
+
     if (c == '\n'){
         column = 0;
         line++; // Goes to start of next line
+    }
+    else if (c == '\r'){
+        column = 0;
     }
     else if (c == '\b'){ 
         // if not at start of column, go up
@@ -69,7 +138,6 @@ void printk(const char* in_string,int start_column, uint8_t colour_code){
         kputc(in_string[i], colour_code);
     }
 }
-
 
 
 void fputc(char c){

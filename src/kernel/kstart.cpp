@@ -29,11 +29,10 @@ void kmain(){
     // Load file system driver
     // Load k modules into memory and link
 
-
     // Clear screen
     for (int i=0; i<2000;i++)
         vmem[i] = 0x0f20;
-
+        
     //printf("Test");
     
     interrupts_init();

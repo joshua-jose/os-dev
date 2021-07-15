@@ -30,6 +30,7 @@ void irq_register(int8_t irq_number, std::function<void()> handler){
 void interrupt_handler(int vector){
     // Store floating point register
     asm volatile("fxsave %0;"::"m"(fxsave_region));
+    //__builtin_ia32_fxsave64 ((void*)&fxsave_region);
 
     int irq_offset = pic_get_irq_offset(); // Offset could have changed!
     // Is this interrupt within the region of IRQs?
@@ -42,6 +43,7 @@ void interrupt_handler(int vector){
     }
     
     asm volatile("fxrstor %0;"::"m"(fxsave_region));
+    //__builtin_ia32_fxrstor64 ((void*)&fxsave_region);
 }
 
 void keyboard_isr(){
