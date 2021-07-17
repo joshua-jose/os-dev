@@ -2,38 +2,10 @@
 #include "kernel/tty/esh.h"
 #include <ctype.h>
 
-// ASCII codes
-const char scancode_to_char[] = {
-         0 , 27 , '1', '2',
-        '3', '4', '5', '6',
-        '7', '8', '9', '0',
-        '-', '=', '\b', 9 ,
-        'q', 'w', 'e', 'r',
-        't', 'y', 'u', 'i',
-        'o', 'p', '[', ']',
-       '\n',  0 , 'a', 's',
-        'd', 'f', 'g', 'h',
-        'j', 'k', 'l', ';',
-        '\'','`',  0 , '\\',
-        'z', 'x', 'c', 'v',
-        'b', 'n', 'm', ',',
-        '.', '/',  0 , '*',
-         0 , ' '
-};
+extern esh_t* esh;
 
 static uint8_t keydown_bitmap[24]; // 192 (8*24) key support
 static bool caps_lock = false;
-
-// 0x1D - Left ctrl pressed
-// 0x2A	- left shift pressed
-// 0x36	- right shift pressed
-// 0x38	- left alt pressed
-// 0x3A	- CapsLock pressed
-
-// 0x80 + key : key released
-
-extern esh_t* esh;
-
 
 void keyboard_recieve_scancode(scancode_t scancode){
     static bool escape_code_sent = false; // Have we got 0xE0 before this?
@@ -72,39 +44,15 @@ void keyboard_scancode_to_key(scancode_t scancode, bool escaped){
     if (escaped){
         char ansi_code = '\0';
         char key = '\0';
-        switch (scancode){
-            case KEY_RIGHT_CTRL:
-                keyboard_bitmap_set(KEY_LEFT_CTRL);
-                break;
+        if (scancode == KEY_RIGHT_CTRL)     keyboard_bitmap_set(KEY_LEFT_CTRL);
+        if (scancode == KEY_HOME)           ansi_code = 'H';
+        if (scancode == KEY_END)            ansi_code = 'F';
+        if (scancode == KEY_CURSOR_UP)      ansi_code = 'A';
+        if (scancode == KEY_CURSOR_DOWN)    ansi_code = 'B';
+        if (scancode == KEY_CURSOR_LEFT)    ansi_code = 'D';
+        if (scancode == KEY_CURSOR_RIGHT)   ansi_code = 'C';
+        if (scancode == KEY_DELETE)         key = (char)127;
 
-            // These ANSI codes are only found in esh, and nowhere else... 
-            // TODO: Come back to this
-            case KEY_HOME:
-                ansi_code = 'H';
-                break;
-            case KEY_END:
-                ansi_code = 'F';
-                break;
-            // Normal ANSI codes
-            
-            case KEY_CURSOR_UP:
-                ansi_code = 'A';
-                break;
-            case KEY_CURSOR_DOWN:
-                ansi_code = 'B';
-                break;
-            
-            case KEY_CURSOR_LEFT:
-                ansi_code = 'D';
-                break;
-            case KEY_CURSOR_RIGHT:
-                ansi_code = 'C';
-                break;
-
-            case KEY_DELETE:
-                key = (char)127; // Delete key in ASCII
-                break;
-        }
         if (ansi_code != '\0'){
             esh_rx(esh, '\e');
             esh_rx(esh, '[');
@@ -116,14 +64,18 @@ void keyboard_scancode_to_key(scancode_t scancode, bool escaped){
     }
 
     else if (scancode <= 58){ // Normal ASCII single byte key
+         bool should_be_caps = caps_lock;
+         bool should_be_shifted = false;
+        if (keyboard_bitmap_get(KEY_LEFT_SHIFT) | keyboard_bitmap_get(KEY_RIGHT_SHIFT)){
+            should_be_caps = !should_be_caps; // shift key inverts whether its caps
+            should_be_shifted = true;
+        }
+
         char key = scancode_to_char[scancode];
-
-        bool should_be_caps = caps_lock;
-        if (keyboard_bitmap_get(KEY_LEFT_SHIFT) | keyboard_bitmap_get(KEY_RIGHT_SHIFT))
-            should_be_caps = !should_be_caps; // shift key inverts whethet its caps
-
-        if (should_be_caps && isalpha(key))
-            key = toupper(key); // Make it CAPS!
+        if (should_be_shifted)
+            key = shifted_scancode_to_char[scancode];
+        else if (should_be_caps && isalpha(key))
+            key = toupper(key);
         
         // If key is ASCII, send to terminal
         esh_rx(esh, key);

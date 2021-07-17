@@ -19,7 +19,7 @@ CXXEXTS:=cpp c++ cc c
 LDFLAGS=--oformat binary -Ttext 0x7c00
 ASFLAGS=-I $(SRCDIR)/boot
 CCFLAGS=-m64 -ffreestanding -std=gnu++14 -mno-red-zone -O2 -fno-exceptions -fno-rtti -mno-mmx -mno-avx
-CCFLAGS+= -mno-sse -mno-sse2 -fno-stack-protector -static -Wall -Wextra -lgcc -I $(INCDIR)
+CCFLAGS+= -fno-stack-protector -static -Wall -Wextra -lgcc -I $(INCDIR)
 
 .DEFAULT_GOAL=run
 .PHONY: build clean all

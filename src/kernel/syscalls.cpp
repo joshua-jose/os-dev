@@ -59,12 +59,11 @@ int read(int file, char *ptr, int len){
 };
 
 caddr_t sbrk(int incr) {
+    extern uintptr_t _end;		/* Defined by the linker */
+    static uintptr_t* heap_end = NULL;
+    uintptr_t* prev_heap_end;
     
-    extern char _end;		/* Defined by the linker */
-    static char *heap_end;
-    char *prev_heap_end;
-    
-    if (heap_end == 0) {
+    if (heap_end == NULL) {
         heap_end = &_end;
     }
     prev_heap_end = heap_end;
@@ -92,11 +91,10 @@ int wait(int *status){
     return -1;
 };
 int write(int file, char *ptr, int len){
-    int todo;
-    if ((file != STDOUT_FILENO) && (file != STDERR_FILENO))
-        return -1;
+    //if ((file != STDOUT_FILENO) && (file != STDERR_FILENO))
+    //    return -1;
     
-    for (todo = 0; todo < len; todo++) {
+    for (int todo = 0; todo < len; todo++) {
         fputc(*ptr++);
     }
     return len;

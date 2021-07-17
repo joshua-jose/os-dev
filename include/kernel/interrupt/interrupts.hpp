@@ -16,3 +16,4 @@ extern "C"
 void interrupt_handler(int vector);
 
 void keyboard_isr();
+void timer_isr();

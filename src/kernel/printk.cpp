@@ -2,6 +2,7 @@
 #include "kernel/kapi.hpp"
 
  #define LINE_LENGTH 80
+ #define SCREEN_HEIGHT 25
 
 void enable_cursor(uint8_t cursor_start=0, uint8_t cursor_end=15) {
     outb(0x3D4, 0x0A);
@@ -21,17 +22,24 @@ void update_cursor(int column, int line) {
 }
 
 void clear_line(int line){
-    
     for (int i=0; i<LINE_LENGTH;i++)
         vmem[(line*LINE_LENGTH)+i] = 0x0f20;
 }
 
 void clear_screen(){
-    for (int i=0; i<2000;i++)
+    for (int i=0; i<(LINE_LENGTH*SCREEN_HEIGHT);i++)
         vmem[i] = 0x0f20;
 }
 
-void kputc(char c, uint8_t colour_code=0x0f){
+void scroll(){
+    for (int i=LINE_LENGTH; i<(LINE_LENGTH-1)*SCREEN_HEIGHT;i++)
+        vmem[i] = vmem[i+LINE_LENGTH];
+    clear_line(SCREEN_HEIGHT-1);
+    
+}
+
+// 0x0f : white text, black background
+void kputc(char c, uint8_t colour_code=0x02){
     static int column = 0;
     static int line = 0;
 
@@ -94,16 +102,16 @@ void kputc(char c, uint8_t colour_code=0x0f){
         column = 0;
         line++; // Goes to start of next line
     }
-    else if (c == '\r'){
+    else if (c == '\r')
         column = 0;
-    }
+    
     else if (c == '\b'){ 
         // if not at start of column, go up
         if (column > 0)
             column--;
         else{
             // Go to end of line above
-            column = 79;
+            column = LINE_LENGTH-1;
             if (line > 0)
                 line--;
         }
@@ -120,12 +128,12 @@ void kputc(char c, uint8_t colour_code=0x0f){
         };
     }
 
-    if (line >= 25){
-            line = 0;
-            // Clear screen
-            for (int i=0; i<2000;i++)
-                vmem[i] = 0x0f20;
+    if (line >= SCREEN_HEIGHT){
+        line = SCREEN_HEIGHT-1;
+        column = 0;
+        scroll();
     }
+    
     update_cursor(column, line);
 }
 
@@ -142,5 +150,4 @@ void printk(const char* in_string,int start_column, uint8_t colour_code){
 
 void fputc(char c){
     kputc(c);
-    
 }

@@ -25,7 +25,7 @@ void pic_remap(int new_offset){
 void pic_ack(int irq){
     // If the IRQ is from PIC2, send it an ack too
     if(irq >= 8)
-      outb(PIC2_COMMAND,PIC_EOI);
+        outb(PIC2_COMMAND,PIC_EOI);
     // Send an ack (0x20) to PIC1 (on port 0x20)
     outb(PIC1_COMMAND, PIC_EOI);
 }

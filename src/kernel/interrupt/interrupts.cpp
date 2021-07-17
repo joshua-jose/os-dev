@@ -3,18 +3,18 @@
 #include "interrupts.hpp"
 #include "pic_driver.hpp"
 #include "kernel/devices/keyboard.hpp"
-
+#include <stdio.h>
 
 static char fxsave_region[512] __attribute__((aligned(16))); // Save floating point register states
 static std::function<void()> IRQs[15]; // An array of ISRs (the actual func type pointers)
 
-
 void interrupts_init(){
     pic_remap(32); // Remap PIC interrupts to above CPU exceptions
-    // Only enable keyboard interrupts (rest are undesired)
-    outb(0x21,0xfd);
+    // Only enable keyboard interrupts and timer interrupts (rest are undesired)
+    outb(0x21,0xfc);
     outb(0xa1,0xff);
 
+    irq_register(0, timer_isr);
     irq_register(1, keyboard_isr);
 
     // Initialise the IDT with our table of interrupt pointers
@@ -46,9 +46,15 @@ void interrupt_handler(int vector){
     //__builtin_ia32_fxrstor64 ((void*)&fxsave_region);
 }
 
+// TODO: move.
+// Make keyboard register one of these
 void keyboard_isr(){
     // Read scancode from keyboard device
     scancode_t scancode = inb(0x60);
     // Tell driver we recieved a scancode
     keyboard_recieve_scancode(scancode);
+}
+// get display handler to register a cb to this
+void timer_isr(){
+    fflush(stdout);
 }

@@ -2,11 +2,15 @@
 *.bin
 *.iso
 *.flp
+*.log
 
 # Ignore bochs config
 *.bxrc
 
 # Ignore object files
+bin/
 bin/**
+toolchain/.build/**
+toolchain/.build
 
 .vscode/**

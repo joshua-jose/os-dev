@@ -2,6 +2,46 @@
 #include "kernel/interrupt/interrupts.hpp"
 #include "kernel/tty/tty.hpp"
 #include <stdio.h>
+#include <string>
+
+/*
+Todo:
+recompile compiler without SSE
+proper display/ terminal manager (rewrite printk.cpp into display/.., seperate VGA display driver and terminal code)
+dont get keyboard to directly call the shell rx, get it to put keys into a stack / file or smth somewhere, best to put it
+in stdin actually...
+get keyboard driver to register an interrupt handler itself
+Memory management (PMM, VMM, PFA, get memory map from bootloader, GDT, LDT, paging)
+compile kernel as ELF file and let bootloader load that
+bootloader reads FS (fat 16) 
+higher-half kernel
+change fs to fat 16
+CPU exception handler
+move _start to crt0
+handle spurious IRQs
+use APIC instead of PIC
+replace newlib memory allocator with something like liballoc so we can use mmap()
+AHCI support
+keyboard handle different scancode sets
+simple fs driver that lets other drivers hook /dev/..
+display fb appears under /dev/fb
+put TTY/ stdout/stdin under dev/..
+keyboard needs to support multiple layouts (load keyboard layout as config file dynamically?)
+keyboard -> display pipeline should handle UTF-8 strings
+ATA fs driver (with fat 16 driver)
+PCI support
+    USB support
+    USB mass storage
+Video mode changing
+
+kernel task scheduler
+multiple processor support
+mouse support
+Userland...
+SVGAlib inclusion
+X server/ LVGL?
+run doom
+*/
 
 struct GDT{
 
@@ -32,12 +72,10 @@ void kmain(){
     // Clear screen
     for (int i=0; i<2000;i++)
         vmem[i] = 0x0f20;
-        
-    //printf("Test");
-    
+
     interrupts_init();
     tty_init();
-
+    printf("Test");
 
     while (true)
         asm volatile ("hlt;jmp .-1;");
@@ -66,6 +104,10 @@ extern uintptr_t _end;
 // Define _start, and put it in special section ._start
 // This means the linker can put it at the start of the sector
 // Also define as a C style function, so the name isn't mangled
+
+extern "C" void __libc_init_array();
+extern "C" void _init(void) {;}
+
 extern "C"
 __attribute__ ((section("._start")))
 void  _start(){
@@ -76,6 +118,7 @@ void  _start(){
         *bss_ptr++ = 0;
     }
 
+    /*
     // Make sure that the data section is initialized
     uintptr_t *init_values_ptr = &_etext;
     uintptr_t *data_ptr = &_sdata;
@@ -84,6 +127,10 @@ void  _start(){
             *data_ptr++ = *init_values_ptr++;
         }
     }
+    */
+
+    // Run C++ constructors / any other initialisation
+    __libc_init_array();
 
     kmain();
 }

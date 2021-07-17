@@ -16,8 +16,7 @@ SECTIONS
 		_etext = .;
 	}
 
-	 
-	/* Read-write data (initialized) */
+    /* Read-write data (initialized) */
 	.data BLOCK(4K) : ALIGN(4K)
 	{
 		_sdata = .;
@@ -39,6 +38,8 @@ SECTIONS
 		*(.bss*)
 		_ebss = .;
 	}
+
+    . = ALIGN(64);
 	_end =.;
  
 }
