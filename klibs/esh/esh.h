@@ -152,8 +152,8 @@
 #define ESH_H
 
 #define ESH_INTERNAL_INCLUDE
-#include "kernel/tty/esh_incl_config.h"
-#include "kernel/tty/esh_hist.h"
+#include "esh_incl_config.h"
+#include "esh_hist.h"
 #undef ESH_INTERNAL_INCLUDE
 #include <stddef.h>
 #include <stdbool.h>

@@ -1,17 +1,11 @@
 #pragma once
 #include <cstdint>
 
-
-#define VGA_START 0xB8000
 #define GDT_OFFSET_KERNEL_CODE 0x08
 #define NUM_INTERRUPTS 256
 #define IRQ_START 8
 
-// Memory is volatile - Don't optimise it away even if it seems nothing is happening
-// 16 bits per character, and the pointer is constant
-volatile uint16_t* const vmem = (volatile uint16_t*)VGA_START;
-
-void printk(const char* in_string,int start_column=0, uint8_t colour_code=0x02);
+void printk(const char* in_string, int start_column=0);
 void fputc(char c);
 
 static inline void outb(uint16_t port, uint8_t val) {

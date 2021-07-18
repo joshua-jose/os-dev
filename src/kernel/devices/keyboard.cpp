@@ -1,5 +1,5 @@
 #include "keyboard.hpp"
-#include "kernel/tty/esh.h"
+#include "esh/esh.h"
 #include <ctype.h>
 
 extern esh_t* esh;

@@ -1,22 +1,8 @@
 #include "kernel/kapi.hpp"
 #include "tty.hpp"
-#include "esh.h"
-
-int strcmp(const char *X, const char *Y)
-{
-    while (*X) {
-        // if characters differ, or end of the second string is reached
-        if (*X != *Y) 
-            break;
-        
-        // move to the next pair of characters
-        X++;
-        Y++;
-    }
- 
-    // return the ASCII difference after converting `char*` to `unsigned char*`
-    return *(const unsigned char*)X - *(const unsigned char*)Y;
-}
+#include "esh/esh.h"
+#include "kernel/devices/display.hpp"
+#include <cstring>
 
 void esh_print_cb(esh_t * esh, char c, void * arg)
 {
@@ -29,19 +15,16 @@ void esh_print_cb(esh_t * esh, char c, void * arg)
 
 void show_colours(){
     uint8_t colour_code = 0x1f;
-    uint8_t character = 0x20;
-    int phrase = (colour_code << 8) | character;
     
     for (int z=0;z<5;z++){
         
         for (int i=0; i<2000;i+=2){
             // Put coloured space in two slots
-            vmem[i] = phrase;
-            vmem[i+1] = phrase;
+            display_putchar(' ', colour_code, i);
+            display_putchar(' ', colour_code, i+1);
 
             // Change the colour every two spaces
             colour_code+= 0x10;
-            phrase = (colour_code << 8) | character;
 
             if (i%40 == 0) colour_code+= 0x10;
         }
