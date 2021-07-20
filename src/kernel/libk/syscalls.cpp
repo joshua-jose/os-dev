@@ -7,10 +7,12 @@
 #include <stdio.h>
 
 #include "kernel/kapi.hpp"
+#include "kernel/devices/keyboard.hpp"
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 
+#define STDIN_FILENO 0
 #define STDOUT_FILENO 1
 #define STDERR_FILENO 2
 
@@ -20,7 +22,10 @@ char *__env[1] = { 0 };
 char **environ = __env; // pointer to array of char * strings that define the current environment variables 
 
 
-void _exit (int __status);
+void _exit (int __status){
+    asm volatile("cli");
+    asm volatile("hlt");
+};
 
 int close(int file) {
     return -1;
@@ -54,8 +59,18 @@ int lseek(int file, int ptr, int dir){
 int open(const char *name, int flags, ...){
     return -1;
 };
-int read(int file, char *ptr, int len){
-    return 0;
+int read(int file, char* buf, int len){
+    if (file != STDIN_FILENO)
+        return -1;
+
+    int read = 0;
+    for (; len>0; len--){
+        char c =  keyboard_buffer_getc();
+        *buf++ = c;
+        read++;
+    }
+
+    return read;
 };
 
 caddr_t sbrk(int incr) {
@@ -91,8 +106,8 @@ int wait(int *status){
     return -1;
 };
 int write(int file, char *ptr, int len){
-    //if ((file != STDOUT_FILENO) && (file != STDERR_FILENO))
-    //    return -1;
+    if ((file != STDOUT_FILENO) && (file != STDERR_FILENO))
+        return -1;
     
     for (int todo = 0; todo < len; todo++) {
         fputc(*ptr++);

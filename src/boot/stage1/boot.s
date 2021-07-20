@@ -65,23 +65,21 @@ _start_continue:
     mov %ax, %es # It sets %es...
 
     call load_stage_2 # Load the second stage of the bootloader
-    call load_kernel # Load the kernel into memory
     
     jmp STAGE2_SPACE # Enter stage 2 of bootloader, attempt to enter protected mode.
 # End of _start
 
 load_stage_2:
     mov $STAGE2_SPACE, %bx # Read to STAGE2_SPACE, where stage 2 will be loaded
-    mov $STAGE2_SECTORS, %al # Read enough sectors to read stage 2
-    mov $0x02, %cl  # Select sector
+    mov $STAGE2_SECTORS, %dx # Read enough sectors to read stage 2
+    mov $0x01, %cx  # Select sector
     
-    call disk_load # Load data from disk using above arguments
+    call disk_load_small # Load data from disk using above arguments
     ret
 
 .include "printb.inc"
 
 .include "diskload.inc"
-.include "load_kernel.inc"
 
 msg: .asciz "Hello World!\r\n"
 BOOT_DISK: .byte 0 # The disk we booted from

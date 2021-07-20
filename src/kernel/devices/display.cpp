@@ -48,6 +48,13 @@ void terminal_update_cursor(){
     outb(0x3D5, (uint8_t) ((pos >> 8) & 0xFF));
 };
 
+void terminal_scroll(){
+    for (int i=VGA_LINE_LENGTH; i<(VGA_LINE_LENGTH-1)*VGA_SCREEN_HEIGHT;i++)
+        vmem[i] = vmem[i+VGA_LINE_LENGTH];
+    terminal_clear_line(VGA_SCREEN_HEIGHT-1);
+    
+}
+
 void terminal_inc_column(int n){
     text_column += n;
     if (text_column > VGA_LINE_LENGTH) 
@@ -64,13 +71,6 @@ void terminal_dec_column(int n){
 void terminal_clear_line(int line){
     for (int i=0; i<VGA_LINE_LENGTH; i++)
         display_putchar(' ', 0x0f, (line*VGA_LINE_LENGTH)+i);
-}
-
-void terminal_scroll(){
-    for (int i=VGA_LINE_LENGTH; i<(VGA_LINE_LENGTH-1)*VGA_SCREEN_HEIGHT;i++)
-        vmem[i] = vmem[i+VGA_LINE_LENGTH];
-    terminal_clear_line(VGA_SCREEN_HEIGHT-1);
-    
 }
 
 bool terminal_handle_ansi(char c){

@@ -7,6 +7,7 @@ typedef uint8_t scancode_t;
 #define RELEASED_BIT 0x80
 #define SINGLE_BYTE_END 0x60
 #define BITMAP_TABLE_SIZE 8
+#define KEYBOARD_BUFFER_SIZE 1024
 
 #define KEY_CAPS_LOCK 0x3A
 #define KEY_LEFT_SHIFT 0x2A
@@ -65,3 +66,6 @@ void keyboard_scancode_to_key(scancode_t scancode, bool escaped=false);
 
 void keyboard_bitmap_set(scancode_t scancode,bool escaped=false);
 bool keyboard_bitmap_get(scancode_t scancode, bool escaped=false);
+
+void keyboard_buffer_putc(char c);
+int keyboard_buffer_getc();

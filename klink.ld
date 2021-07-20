@@ -1,4 +1,5 @@
-TARGET(binary)
+/*TARGET(binary)*/
+/*OUTPUT_FORMAT(elf64-x86-64)*/
 ENTRY(_start)
 
 /* Tell where the various sections of the object files will be put in the final

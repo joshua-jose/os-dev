@@ -1,10 +1,11 @@
 # Function
 # Loads data from disk into specified location
 # Arguments:
-# al: how many sectors to read
-# bx: destination address
-# cl: Beginning sector
-disk_load:
+# bx: destination offset
+# es: destination segment
+# cx: Beginning sector (as LBA)
+.global disk_load // let load_kernel link against this
+disk_load_sector:
     pusha # Push all register values from stack
 
     # Turn LBA into CHS
@@ -15,46 +16,45 @@ disk_load:
     Cylinder = Temp / (Number of Heads)
     */
     
-    mov %cl, (abs_sector)
+    mov %cx, (abs_sector)
     mov %bx, (destination)
-    mov %al, (sector_count)
     mov %es, %bx
     mov %bx, (segment)
-    xor %bx, %bx
+    xor %bx, %bx // clear bx
 
     // Calculate CHS address
     // ---------------------------------------------------------------------------
     # LBA address is at cl
-    xor %ax, %ax # Clear ax 
-    mov %cl, %al // Move beginning sector to be divided
-    dec %al # LBA starts at 0, CHS starts at 1
-    mov (bpbSectorsPerTrack), %bl # Divide by sectors per track
-    div %bl #  LBA / (Sectors per Track)
+    //xor %ax, %ax # Clear ax 
+    xor %dx, %dx # clear dx
+    mov %cx, %ax // Move beginning sector to be divided
+    mov (bpbSectorsPerTrack), %bx # Divide by sectors per track
+    div %bx # LBA / (Sectors per Track)
 
-    inc %ah # remainder is in ah
-    mov %ah, (sector) # Sector is  (LBA % (Sectors per Track)) + 1
-    
-    xor %ah, %ah # ax = al, so just LBA / (Sectors per Track)
+    inc %dx # remainder, truncate later by only taking dl
+    mov %dl, (sector) # Sector is  (LBA % (Sectors per Track)) + 1
 
-    mov (bpbHeadsPerCylinder), %bl # divide by heads per cylinder
-    div %bl # Temp / (Number of Heads)
+    xor %dx, %dx # ax = quotient, so ax = Temp =  LBA / (Sectors per Track)
 
-    mov %ah, (head) # Head = Temp % (Number of Heads)
+    mov (bpbHeadsPerCylinder), %bx # divide by heads per cylinder
+    div %bx # Temp / (Number of Heads)
+
+    mov %dl, (head) # Head = Temp % (Number of Heads)
     mov %al, (cylinder) # cylinder = Temp / (Number of Heads)
     // ---------------------------------------------------------------------------
     // Load proper values back into registers
     mov (segment), %bx 
     mov %bx, %es
     mov (destination),  %bx
-    mov (sector_count), %al
+    mov $1, %al
     mov (sector), %cl
+    
     mov (BOOT_DISK), %dl # Select the disk we want to read from (our boot disk)
-    mov (cylinder), %ch # Select cylinder
-    mov (head), %dh
+    #mov (cylinder), %ch # Select cylinder
+    #mov (head), %dh
     
     mov $2, %ah # BIOS function to read from disk
     
-    /*
     mov (cylinder), %ch # Select cylinder
     and $0xff, %ch # Only part of cylinder selector
 
@@ -64,57 +64,46 @@ disk_load:
     and $0xC0, %dh
     or %dh, %cl
     mov (head), %dh  # Select head
-    */
-    /*
-    mov $0x02, %ah # BIOS function to read from disk
-    mov (BOOT_DISK), %dl # Select the disk we want to read from (our boot disk)
-    mov $0x00, %ch # Select cylinder 0
-    mov $0x00, %dh  # Select head 0
-    */
 
     clc # Clear carry
     int $0x13 # Call BIOS interrupt to read from disk
     jc read_failed # BIOS function sets carry bit if disk read failed
     # So, jump to error routine if function errored
     
-
     popa # Pop all register values from stack
     ret
 
-# Function
-# Loads data from disk into specified location
-# Arguments:
-# al: how many sectors to read
-# bx: destination address
-# cx: LBA address
-# dx: destination segment
-/*
-lba_load:
-    pusha
-    mov %al, (lbap_num_sectors)
-    mov %bx, (lbap_buffer_offset)
-    mov %cx, (lbap_lba_low)
-    mov %dx, (lbap_buffer_segment)
+# es: destination segment
+# bx: destination offset
+# cx: beginning sector (as LBA + 1)
+# dx: number of sectors to load
 
-    mov $lba_packet, %si
-    mov $0x42, %ah # Extended read command
-    mov (BOOT_DISK), %dl
-    int $0x13
-    jc read_failed
-
-    popa
+disk_load:
+    call disk_load_sector
+    
+    mov %es, %bx # Increase segment count
+    add $(SECTOR_SIZE >> 4), %bx
+    mov %bx, %es
+    xor %bx, %bx # Load %es and clear %bx
+    
+    inc %cx # next sector
+    dec %dx # reduce counter
+    cmp $0, %dx # Check if counter is ended
+    
+    jne disk_load
     ret
 
-.align 4
-lba_packet:
-    lbap_size:           .byte 16 # size of packet
-    lbap_zero:           .byte 0
-    lbap_num_sectors:    .word 0  # How many sectors to load (no more than 127)
-    lbap_buffer_offset:  .word 0 
-    lbap_buffer_segment: .word 0 
-    lbap_lba_low:        .double 0
-    lbap_lba_high:       .double 0 # Only use 16 bits!
-*/
+disk_load_small:
+    call disk_load_sector
+    
+    add $SECTOR_SIZE, %bx
+    
+    inc %cx # next sector
+    dec %dx # reduce counter
+    cmp $0, %dx # Check if counter is ended
+    
+    jne disk_load_small
+    ret
 
 load_config:
     segment:      .word 0
@@ -129,13 +118,13 @@ load_config:
 
 # Drive read error routine, print error message and halt.
 read_failed:
+    mov (abs_sector), %di
     mov $1, %ah # BIOS function to get status of last disk operation
     int $0x13
 
     mov $read_failed_msg, %bx # Move string pointer into bx
     call realprint # print
     #popa # Debugging purposes
-    mov (abs_sector), %di
     hlt
     jmp .-1
 

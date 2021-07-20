@@ -1,11 +1,14 @@
 #include "keyboard.hpp"
-#include "esh/esh.h"
 #include <ctype.h>
-
-extern esh_t* esh;
+#include <stdio.h>
 
 static uint8_t keydown_bitmap[24]; // 192 (8*24) key support
 static bool caps_lock = false;
+
+// This is a queue
+static char key_presses_buffer[KEYBOARD_BUFFER_SIZE];
+static int keyboard_buffer_front = 0;
+static int keyboard_buffer_back = 1;
 
 void keyboard_recieve_scancode(scancode_t scancode){
     static bool escape_code_sent = false; // Have we got 0xE0 before this?
@@ -52,14 +55,14 @@ void keyboard_scancode_to_key(scancode_t scancode, bool escaped){
         if (scancode == KEY_CURSOR_LEFT)    ansi_code = 'D';
         if (scancode == KEY_CURSOR_RIGHT)   ansi_code = 'C';
         if (scancode == KEY_DELETE)         key = (char)127;
-
+        
         if (ansi_code != '\0'){
-            esh_rx(esh, '\e');
-            esh_rx(esh, '[');
-            esh_rx(esh, ansi_code);
+            keyboard_buffer_putc('\e');
+            keyboard_buffer_putc('[');
+            keyboard_buffer_putc(ansi_code);
         }
         else
-            esh_rx(esh, key);
+            keyboard_buffer_putc(key);
         
     }
 
@@ -78,7 +81,7 @@ void keyboard_scancode_to_key(scancode_t scancode, bool escaped){
             key = toupper(key);
         
         // If key is ASCII, send to terminal
-        esh_rx(esh, key);
+        keyboard_buffer_putc(key);
     }
 }
 
@@ -110,3 +113,21 @@ bool keyboard_bitmap_get(scancode_t scancode, bool escaped){
 
     return keydown_bitmap[bitmap_table] & (1<<bitmap_entry);
 }
+
+void keyboard_buffer_putc(char c){
+    if (keyboard_buffer_back == keyboard_buffer_front){
+        //return; // if the buffer is full then don't do anything
+        keyboard_buffer_front++; // Remove the stalest information
+    }
+    
+    key_presses_buffer[keyboard_buffer_back] = c;
+    keyboard_buffer_back++;
+    keyboard_buffer_back %= KEYBOARD_BUFFER_SIZE;
+};
+int keyboard_buffer_getc(){
+    int front_inc = (keyboard_buffer_front+1)%KEYBOARD_BUFFER_SIZE; // Front position incremented
+    if (front_inc == keyboard_buffer_back) return EOF;
+    keyboard_buffer_front = front_inc;
+    return key_presses_buffer[keyboard_buffer_front];
+
+};

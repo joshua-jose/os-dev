@@ -2,9 +2,11 @@
 #include "tty.hpp"
 #include "esh/esh.h"
 #include "kernel/devices/display.hpp"
+#include "kernel/devices/keyboard.hpp"
 #include <cstring>
+#include <cstdio>
 
-void esh_print_cb(esh_t * esh, char c, void * arg)
+void tty_print_cb(esh_t * esh, char c, void * arg)
 {
     // prevent compiler from complaining
     (void) esh; 
@@ -35,7 +37,7 @@ void show_colours(){
 }
 
 
-void esh_command_cb(esh_t * esh, int argc, char ** argv, void * arg)
+void tty_command_cb(esh_t * esh, int argc, char ** argv, void * arg)
 {
     (void) esh;
     (void) arg;
@@ -58,9 +60,20 @@ esh_t* esh;
 
 void tty_init(){
     esh = esh_init();
-    esh_register_command(esh, esh_command_cb);
-    esh_register_print(esh, esh_print_cb);
+    esh_register_command(esh, tty_command_cb);
+    esh_register_print(esh, tty_print_cb);
 
     esh_rx(esh, '\n');
     esh_hist_init(esh);
+
 };
+
+void tty_input_loop(){
+    for (;;) {
+        int c = keyboard_buffer_getc();
+        
+        if (c > 0 && c <= 255)
+            esh_rx(esh, c);
+        
+    }
+}

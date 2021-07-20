@@ -7,21 +7,22 @@
 
 /*
 Todo:
-proper display/ terminal manager (rewrite printk.cpp into display/.., seperate VGA display driver and terminal code)
-dont get keyboard to directly call the shell rx, get it to put keys into a stack / file or smth somewhere, best to put it
-in stdin actually...
+**proper display/ terminal manager (rewrite printk.cpp into display/.., seperate VGA display driver and terminal code)
+**dont get keyboard to directly call the shell rx, get it to put keys into a stack / file or smth somewhere, best to put it in stdin actually...
 get keyboard driver to register an interrupt handler itself
 Memory management (PMM, VMM, PFA, get memory map from bootloader, GDT, LDT, paging)
 compile kernel as ELF file and let bootloader load that
 bootloader reads FS (fat 16) 
 higher-half kernel
+UEFI bootloader & BOOTBOOT support
 change fs to fat 16
 CPU exception handler
-move _start to crt0
+**move _start to crt0
 handle spurious IRQs
 use APIC instead of PIC
 replace newlib memory allocator with something like liballoc so we can use mmap()
 AHCI support
+Dynamic linking / loading or at least loading config/assets from disk at runtime
 keyboard handle different scancode sets
 simple fs driver that lets other drivers hook /dev/..
 display fb appears under /dev/fb
@@ -42,7 +43,7 @@ SVGAlib inclusion
 X server/ LVGL?
 run doom
 */
-
+/*
 struct GDT{
 
 };
@@ -62,7 +63,7 @@ typedef struct{
     uint64_t no_execute:1;
 
 }__attribute__((packed)) page_entry_t;
-
+*/
 
 void kmain(){
     // Load memory manager
@@ -71,21 +72,12 @@ void kmain(){
 
     // Clear screen
     display_clear();
-
+    
     interrupts_init();
     tty_init();
-    printf("Test");
-
+    
+    tty_input_loop();
     while (true)
         asm volatile ("hlt;jmp .-1;");
-    
-
-    /*
-    for (;;) {
-        int c = getchar();
-        if (c > 0 && c <= 255)
-            esh_rx(esh, c);
         
-    }
-    */
 };

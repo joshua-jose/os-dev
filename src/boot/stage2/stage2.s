@@ -8,8 +8,11 @@ jmp enter_protected_mode
 # GDT must be defined before trying to enter protected mode
 .include "gdt.inc"
 .include "a20.inc"
+.include "load_kernel.inc"
+.include "load_elf.inc"
 
 enter_protected_mode:
+    call load_kernel # Load the kernel into memory
     call enable_a20 # Enable the A20 line
     cli # Disable interrupts
     
