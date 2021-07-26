@@ -7,7 +7,12 @@ start_long_mode:
     rep stosq # Store quad in %rax into VGA memory, rep 500 times
     mov %bp, %sp # Clear the stack 
     
-    call KERNEL_SPACE # Call _start in kernel
+    mov (LOAD_AREA+0x18), %rax # Program entry point
+
+    # TODO: get entry point from ELF
+    call *%rax # Call _start in kernel (at address in rax)
     hlt
     jmp .
 
+// Address where the program entry point is
+elf_entry_point: .quad 0

@@ -39,8 +39,6 @@ SECTIONS
 		*(.bss*)
 		_ebss = .;
 	}
-
-    . = ALIGN(64);
 	_end =.;
  
 }

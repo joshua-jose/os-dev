@@ -12,7 +12,7 @@ extern uintptr_t _edata;
 extern uintptr_t _end;
 
 extern "C" void __libc_init_array();
-extern "C" void _init(void) {;}
+extern "C" void _init() {return;}
 
 // Kernel main function
 void kmain();

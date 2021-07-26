@@ -22,9 +22,10 @@ CXXEXTS:=cpp c++ cc c
 LDFLAGS=--oformat binary -Ttext 0x7c00
 ASFLAGS=-I $(SRCDIR)/boot
 CCFLAGS=-m64 -ffreestanding -std=gnu++14 -mno-red-zone -O2 -fno-exceptions -fno-rtti -mno-mmx -mno-avx
-CCFLAGS+= -fno-stack-protector -n -g3 -fno-asynchronous-unwind-tables -static -Wall -Wextra -lgcc -I $(INCDIR) -I $(LIBDIR)
+CCFLAGS+= -fno-stack-protector -Wl,-z,max-page-size=4096 -g3 -fno-asynchronous-unwind-tables -static -Wall -Wextra -lgcc -I $(INCDIR) -I $(LIBDIR)
 # -s to strip symbols (saves a lot of space)
 # remove -g to remove debugging symbols (takes up loads of space)
+# -Wl,-z,max-page-size=4096 to actually align sections
 .DEFAULT_GOAL=run
 .PHONY: build clean all
 .ONESHELL:
