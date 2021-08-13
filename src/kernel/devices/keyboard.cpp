@@ -88,17 +88,17 @@ void keyboard_scancode_to_key(scancode_t scancode, bool escaped){
 void keyboard_bitmap_set(scancode_t scancode,bool escaped){
     bool released = (scancode & RELEASED_BIT); // This key is a released key if bit 0x80 is set
     
-    int bitmap_table = scancode / BITMAP_TABLE_SIZE; 
-    int bitmap_entry = scancode % BITMAP_TABLE_SIZE;
+    int bitmap_table = scancode / KB_BITMAP_TABLE_SIZE; 
+    int bitmap_entry = scancode % KB_BITMAP_TABLE_SIZE;
 
     // The last single byte scancode is 0x58, so shift it to above that
     // div by 8 because thats the size of our bitmap
     // shift into higher tables for extra keys
-    if (escaped) bitmap_table += SINGLE_BYTE_END / BITMAP_TABLE_SIZE; 
+    if (escaped) bitmap_table += SINGLE_BYTE_END / KB_BITMAP_TABLE_SIZE; 
     // The table value is from the scancode with the released bit
     // This will not flip the same bit that was set, so we need to convert it to a "make code" (without the extra bit)
     // These 8s are from uint8_t, the size of the bitmap table
-    if (released) bitmap_table -= RELEASED_BIT / BITMAP_TABLE_SIZE;
+    if (released) bitmap_table -= RELEASED_BIT / KB_BITMAP_TABLE_SIZE;
 
     keydown_bitmap[bitmap_table] &= ~(1 << bitmap_entry); // (x & !1) will clear that bit
     keydown_bitmap[bitmap_table] |= (!released) << bitmap_entry; // or it with our desired value
@@ -106,10 +106,10 @@ void keyboard_bitmap_set(scancode_t scancode,bool escaped){
 }
 
 bool keyboard_bitmap_get(scancode_t scancode, bool escaped){
-    int bitmap_table = scancode / BITMAP_TABLE_SIZE; 
-    int bitmap_entry = scancode % BITMAP_TABLE_SIZE;
+    int bitmap_table = scancode / KB_BITMAP_TABLE_SIZE; 
+    int bitmap_entry = scancode % KB_BITMAP_TABLE_SIZE;
 
-    if (escaped) bitmap_table += SINGLE_BYTE_END / BITMAP_TABLE_SIZE; 
+    if (escaped) bitmap_table += SINGLE_BYTE_END / KB_BITMAP_TABLE_SIZE; 
 
     return keydown_bitmap[bitmap_table] & (1<<bitmap_entry);
 }

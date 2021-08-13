@@ -4,12 +4,12 @@
 // This means the linker can put it at the start of the sector
 // Also define as a C style function, so the name isn't mangled
 
-extern uintptr_t _sbss;
-extern uintptr_t _ebss;
-extern uintptr_t _etext;
-extern uintptr_t _sdata;
-extern uintptr_t _edata;
-extern uintptr_t _end;
+extern uint8_t _sbss;
+extern uint8_t _ebss;
+extern uint8_t _etext;
+extern uint8_t _sdata;
+extern uint8_t _edata;
+extern uint8_t _end;
 
 extern "C" void __libc_init_array();
 extern "C" void _init() {return;}
@@ -23,7 +23,7 @@ void  _start(){
     // Initialize C runtime environment
 
     // Make sure BSS is initialised to 0
-    for (uintptr_t *bss_ptr = &_sbss; bss_ptr < &_ebss;) {
+    for (uint8_t *bss_ptr = &_sbss; bss_ptr < &_ebss;) {
         *bss_ptr++ = 0;
     }
 

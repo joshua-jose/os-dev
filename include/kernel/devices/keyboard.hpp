@@ -6,7 +6,7 @@ typedef uint8_t scancode_t;
 #define ESCAPE_CODE 0xE0
 #define RELEASED_BIT 0x80
 #define SINGLE_BYTE_END 0x60
-#define BITMAP_TABLE_SIZE 8
+#define KB_BITMAP_TABLE_SIZE 8
 #define KEYBOARD_BUFFER_SIZE 1024
 
 #define KEY_CAPS_LOCK 0x3A

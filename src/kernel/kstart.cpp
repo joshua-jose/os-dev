@@ -2,6 +2,7 @@
 #include "kernel/interrupt/interrupts.hpp"
 #include "kernel/tty/tty.hpp"
 #include "kernel/devices/display.hpp"
+#include "kernel/memory/pmem_manager.hpp"
 #include <stdio.h>
 #include <string>
 
@@ -72,7 +73,22 @@ void kmain(){
 
     // Clear screen
     display_clear();
-    
+
+    pmem_init();
+    extern uint8_t _end;
+    printf("End of kernel: 0x%lX\n", (uint64_t)&_end);
+
+    uintptr_t page = pmem_alloc_page();
+    printf("Allocated page: 0x%lX\n", (uint64_t)page);
+    page = pmem_alloc_page();
+    printf("Allocated page: 0x%lX\n", (uint64_t)page);
+    page = pmem_alloc_page();
+    printf("Allocated page: 0x%lX\n", (uint64_t)page);
+    pmem_free_page(page);
+    printf("Freed page:     0x%lX\n", (uint64_t)page);
+    page = pmem_alloc_page();
+    printf("Allocated page: 0x%lX\n", (uint64_t)page);
+
     interrupts_init();
     tty_init();
     
